@@ -1,0 +1,18 @@
+version: "2"
+
+services:
+  android-emulator:
+    restart: "no"
+    image: android-emu:tv
+    container_name: android-emu
+    environment:
+      - container="docker"
+    ports:
+      - "32808:6080" #VNC connection
+      - "32809:5555" #Emulator adb
+      - "32810:5554" #Emulator console
+      - "32811:22"   #SSH
+    volumes:
+      - $PWD/videos:/tmp/videos
+    devices:
+      - /dev/kvm:/dev/kvm
