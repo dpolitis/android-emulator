@@ -3,10 +3,11 @@ version: "2"
 services:
   android-emulator:
     restart: "no"
-    image: android-emu:tv
+    image: android-emu:25
     container_name: android-emu
     environment:
-      - container="docker"
+      - container=docker
+      #- ANDROID_DEVICE=automotive_1024p_landscape
     ports:
       - "32808:6080" #VNC connection
       - "32809:5555" #Emulator adb
@@ -14,5 +15,6 @@ services:
       - "32811:22"   #SSH
     volumes:
       - $PWD/videos:/tmp/videos
+      - $HOME/.android:/root/.android
     devices:
       - /dev/kvm:/dev/kvm

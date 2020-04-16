@@ -3,19 +3,20 @@
 FROM centos:7
 
 # Specially for SSH access and port redirection
-ENV PASSWORD android
+ENV PASSWORD="android"
 
 # Installation variables
 ARG ANDROID_SDK_VERSION="6200805"
 # ARCH can be "x86", "x86_64", "armeabi-v7a", "arm64-v8a", "mips"
 ENV ANDROID_ARCH="x86"
 # ANDROID_API can be "default","google_apis", "google_apis_playstore", "android-tv", "android-wear", "android-wear-cn"
-ENV ANDROID_API="google_apis_playstore"
+ENV ANDROID_API="google_apis"
 # ANDROID_PLATFORM can be "android-10"-"android-29"
-ENV ANDROID_PLATFORM="android-29"
-ENV ANDROID_DEVICE="7in WSVGA (Tablet)"
+ENV ANDROID_PLATFORM="android-25"
+# ANDROID_DEVICE can be any value from device_list.txt (beware no quotes in value!!)
+ENV ANDROID_DEVICE=pixel_3
 
-ENV BUILD_TOOLS="29.0.3"
+ENV BUILD_TOOLS="25.0.3"
 ENV GRADLE_TOOLS="6.3"
 
 # Add android tools and platform tools to PATH
@@ -25,7 +26,7 @@ ENV PATH="${PATH}:${GRADLE_HOME}/bin:/opt/gradlew:${ANDROID_HOME}/cmdline-tools/
 ENV LD_LIBRARY_PATH="${ANDROID_HOME}/emulator/lib64:${ANDROID_HOME}/emulator/lib64/qt/lib"
 
 # Export JAVA_HOME variable
-ENV JAVA_HOME="/usr/java/jdk1.8.0_241-amd64"
+ENV JAVA_HOME="/usr/java/jdk1.8.0_251-amd64"
 
 # Export noVNC variables
 ENV DISPLAY=:1 \
@@ -44,7 +45,7 @@ EXPOSE 5554
 EXPOSE 5555
 EXPOSE 6080
 
-COPY files/jdk-8u241-linux-x64.rpm /tmp/jdk-8u241-linux-x64.rpm
+COPY files/jdk-8u251-linux-x64.rpm /tmp/jdk-8u251-linux-x64.rpm
 
 # Update packages
 RUN yum makecache; \
@@ -59,9 +60,10 @@ RUN yum makecache; \
 	alsa-lib \
 	pulseaudio-libs \
 	mesa-dri-drivers \
+	mesa-vulkan-drivers \
 	libXcomposite \
 	libXcursor; \
-    yum localinstall -y /tmp/jdk-8u241-linux-x64.rpm
+    yum localinstall -y /tmp/jdk-8u251-linux-x64.rpm
 
 # Install x11vnc
 RUN sed -i "s/baseurl/#baseurl/g" /etc/yum.repos.d/epel.repo; \
