@@ -15,6 +15,6 @@ services:
       - "32811:22"   #SSH
     volumes:
       - $PWD/videos:/tmp/videos
-      - $HOME/.android:/root/.android
+      - $HOME/.android:/home/android/.android
     devices:
       - /dev/kvm:/dev/kvm

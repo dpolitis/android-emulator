@@ -2,8 +2,8 @@
 
 FROM centos:7
 
-# Specially for SSH access and port redirection
-ENV PASSWORD="android"
+# Specially for SSH access and port redirection (beware no quotes in value!!)
+ENV PASSWORD=android
 
 # Installation variables
 ARG ANDROID_SDK_VERSION="6200805"
@@ -51,6 +51,7 @@ COPY files/jdk-8u251-linux-x64.rpm /tmp/jdk-8u251-linux-x64.rpm
 RUN yum makecache; \
     yum -y update; \
     yum -y install net-tools \
+        sudo \
         openssh-server \
 	socat \
 	unzip \
@@ -74,6 +75,17 @@ RUN sed -i "s/baseurl/#baseurl/g" /etc/yum.repos.d/epel.repo; \
     yum install -y x11vnc; \
     yum clean all
 
+# Install gosu
+ENV GOSU_VERSION=1.12
+RUN gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
+    curl -o /usr/local/sbin/gosu -SL "https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-amd64"; \
+    curl -o /usr/local/sbin/gosu.asc -SL "https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-amd64.asc"; \
+    gpg --verify /usr/local/sbin/gosu.asc; \
+    rm -f /usr/local/sbin/gosu.asc; \
+    rm -rf /root/.gnupg; \
+    chmod +x /usr/local/sbin/gosu; \
+    gosu nobody true
+
 # Fix ssh login
 RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -q -N ""; \
     ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -q -N ""; \
@@ -81,8 +93,6 @@ RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -q -N ""; \
     ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -q -N ""
 
 RUN mkdir /var/run/sshd; \
-    echo "root:$PASSWORD" | chpasswd; \
-    sed -i 's/#PermitRootLogin yes/PermitRootLogin yes/' /etc/ssh/sshd_config; \
     echo "export VISIBLE=now" >> /etc/profile
 
 ENV NOTVISIBLE "in users profile"
@@ -91,8 +101,7 @@ ENV NOTVISIBLE "in users profile"
 RUN wget -nv https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_VERSION}_latest.zip -P /tmp; \
     unzip -d /opt /tmp/commandlinetools-linux-${ANDROID_SDK_VERSION}_latest.zip; \
     mkdir -p /opt/android/cmdline-tools; \
-    mv /opt/tools /opt/android/cmdline-tools/latest; \
-    chown -R root:root /opt/android
+    mv /opt/tools /opt/android/cmdline-tools/latest
 
 # Install latest android tools and system images
 RUN yes | sdkmanager --licenses; \
@@ -121,8 +130,11 @@ RUN rm -rf /tmp/*
 
 # Add entrypoint
 ADD files/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+ADD files/run.sh /usr/local/bin/run.sh
 
-WORKDIR /root
+RUN chmod +x /usr/local/bin/entrypoint.sh; \
+    chmod +x /usr/local/bin/run.sh
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+WORKDIR /home/android
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/usr/local/bin/run.sh"]
