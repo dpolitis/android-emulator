@@ -129,4 +129,4 @@ $ podman run -it --rm --privileged \
 android-emu:25
 ```
 
-- The container uses "-gpu host" when invoking the avdmanager, so the /dev/kvm device should be available. This means it runs only in linux systems with the kvm module loaded and with virtualization enabled in BIOS settings. If you use windows docker, install HAXM and search google for the equivalent settings to enable hardware  acceleration into the container (or use "-no-accel" in "files/run.sh" and build the container again, without acceleration).
+- The container uses "-enable-kvm" when invoking the avdmanager, so the /dev/kvm device should be available. This means it runs only in linux systems with the kvm module loaded and with virtualization enabled in BIOS settings. If you use windows docker, install HAXM and search google for the equivalent settings to enable hardware  acceleration into the container (or use "-no-accel" in "files/run.sh" and build the container again, without acceleration).
