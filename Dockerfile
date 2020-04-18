@@ -13,10 +13,10 @@ ENV ANDROID_ARCH="x86"
 ENV ANDROID_API="google_apis"
 # ANDROID_PLATFORM can be "android-10"-"android-29"
 ENV ANDROID_PLATFORM="android-25"
-# ANDROID_DEVICE can be any value from device_list.txt (beware no quotes in value!!)
+# ANDROID_DEVICE can be any value from "files/device_list.txt" (beware no quotes in value!!)
 ENV ANDROID_DEVICE=pixel_3
 
-ENV BUILD_TOOLS="25.0.3"
+ENV BUILD_TOOLS="29.0.3"
 ENV GRADLE_TOOLS="6.3"
 
 # Add android tools and platform tools to PATH
@@ -103,7 +103,7 @@ RUN wget -nv https://dl.google.com/android/repository/commandlinetools-linux-${A
     mkdir -p /opt/android/cmdline-tools; \
     mv /opt/tools /opt/android/cmdline-tools/latest
 
-# Install latest android tools and system images
+# Install latest android tools and system images (you can install other isystem images to your liking, by adding them below)
 RUN yes | sdkmanager --licenses; \
     sdkmanager --install \
     "cmdline-tools;latest" \
@@ -111,7 +111,8 @@ RUN yes | sdkmanager --licenses; \
     "emulator" \
     "platforms;${ANDROID_PLATFORM}" \
     "build-tools;${BUILD_TOOLS}" \
-    "system-images;${ANDROID_PLATFORM};${ANDROID_API};${ANDROID_ARCH}"
+    "system-images;${ANDROID_PLATFORM};${ANDROID_API};x86" \
+    "system-images;${ANDROID_PLATFORM};${ANDROID_API};armeabi-v7a"
 
 # Install Grandle
 RUN wget -nv https://services.gradle.org/distributions/gradle-${GRADLE_TOOLS}-bin.zip -P /tmp; \
@@ -137,4 +138,5 @@ RUN chmod +x /usr/local/bin/entrypoint.sh; \
 
 WORKDIR /home/android
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh", "/usr/local/bin/run.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["/usr/local/bin/run.sh"]

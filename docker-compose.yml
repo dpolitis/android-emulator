@@ -7,14 +7,15 @@ services:
     container_name: android-emu
     environment:
       - container=docker
-      #- ANDROID_DEVICE=automotive_1024p_landscape
+      #- ANDROID_DEVICE=tv_720p
+      #- ANDROID_ARCH=armeabi-v7a
     ports:
       - "32808:6080" #VNC connection
       - "32809:5555" #Emulator adb
       - "32810:5554" #Emulator console
       - "32811:22"   #SSH
     volumes:
-      - $PWD/videos:/tmp/videos
+      - $PWD/projects:/home/android/projects
       - $HOME/.android:/home/android/.android
     devices:
       - /dev/kvm:/dev/kvm

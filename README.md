@@ -1,6 +1,6 @@
 # Android-emulator
 
-Android-emulator is a Docker image with Android SDK, gradle and emulator inside. Big advantage is that you can use this container to access the emulator through your browser, and runs as the UID of your user  (no root).
+Android-emulator is a Docker image with Android SDK, gradle and emulator inside. Big advantage is that you can use this container to access the emulator through your browser, and runs as the UID of your user (no root).
 
 ## Use:
 - Clone repository.
@@ -20,7 +20,9 @@ $ docker-compose up -d
 When the container starts, it runs a couple of commands to fix file permissions, so that they much your UID. This is normal, it takes some time for the emulator to start up. Be patient.
 
 By default it will create and run API 25 (x86) for you (with API: google_apis), but other versions are also supported via changing the appropriate variable in the Dockerfile before building (ANDROID_PLATFORM). You can use docker-compose.yml to set the following environment variables, before invoking docker-compose:
-ANDROID_DEVICE
+
+* ANDROID_DEVICE (any value from files/device_list.txt)
+* ANDROID_ARCH (armeabi-v7a or x86)
 
 ## How to connect to emulator
 By default docker-compose exposes the folloing ports:
@@ -114,4 +116,17 @@ generic_x86:/ # settings put system user_rotation 2
 
 ## FAQ
 - The container is supposed to be run using docker service. You can run it using podman, but you need to use "podman run .." syntax equivalent to the docker-compose parameters (or use kubernetes..). You must also set "--privileged" for the /dev/kvm device to be available into the container with the right permissions.
-- The container uses "-gpu host" when invoking the avdmanager, so the /dev/kvm device should be available. This means it runs only in linux systems with the kvm module loaded and with virtualization enabled in BIOS settings. If you use windows docker, install HAXM and search google for the equivalent settings to enable hardware  acceleration into the container (or use "-gpu off" in "files/run.sh" and build the container again, without acceleration).
+```sh
+$ podman run -it --rm --privileged \
+--device /dev/kvm:/dev/kvm \
+--name android-emu \
+-v projects:/home/android/projects \
+-v $HOME/.android:/home/android/.android \
+-p "32808:6080" \
+-p "32809:5555" \
+-p"32810:5554" \
+-p "32811:22" \
+android-emu:25
+```
+
+- The container uses "-gpu host" when invoking the avdmanager, so the /dev/kvm device should be available. This means it runs only in linux systems with the kvm module loaded and with virtualization enabled in BIOS settings. If you use windows docker, install HAXM and search google for the equivalent settings to enable hardware  acceleration into the container (or use "-no-accel" in "files/run.sh" and build the container again, without acceleration).

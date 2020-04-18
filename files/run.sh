@@ -23,6 +23,9 @@ fi
 echo ANDROID_PLATFORM  = "Requested ANDROID_API: ${ANDROID_PLATFORM} (${ANDROID_ARCH}) emulator."
 adb start-server
 
+# set hardware accelaration
+[[ $ARCH == "x86" ]] || [[ $ARCH == "x86_64" ]] && KVM="-enable-kvm" || KVM=""
+
 # Point DISPLAY to virtual X Server
 export DISPLAY=:0
 
@@ -42,4 +45,4 @@ socat tcp-listen:5555,bind=$ip,fork tcp:127.0.0.1:5555 &
 
 # Start emulator for a pre-defined avd
 echo "no" | avdmanager create avd -f -n ${ANDROID_PLATFORM}-emu -k "system-images;${ANDROID_PLATFORM};${ANDROID_API};${ANDROID_ARCH}" -d ${ANDROID_DEVICE}
-emulator -avd ${ANDROID_PLATFORM}-emu -gpu host -no-audio -no-boot-anim -nojni -netfast -qemu -enable-kvm > /tmp/emulator.log 2>&1
+emulator -avd ${ANDROID_PLATFORM}-emu -gpu host -no-audio -no-boot-anim -nojni -netfast -qemu $KVM > /tmp/emulator.log 2>&1
