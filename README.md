@@ -124,7 +124,7 @@ $ podman run -it --rm --privileged \
 -v $HOME/.android:/home/android/.android \
 -p "32808:6080" \
 -p "32809:5555" \
--p"32810:5554" \
+-p "32810:5554" \
 -p "32811:22" \
 --sysctl=net.ipv6.conf.all.disable_ipv6=1 \
 -e GOSU_UID=$(id -u) \
