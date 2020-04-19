@@ -126,7 +126,10 @@ $ podman run -it --rm --privileged \
 -p "32809:5555" \
 -p"32810:5554" \
 -p "32811:22" \
-android-emu:25
+--sysctl=net.ipv6.conf.all.disable_ipv6=1 \
+-e GOSU_UID=$(id -u) \
+-e GOSU_GID=$(id -g) \
+localhost/android-emu:25
 ```
 
 - The container uses "-enable-kvm" when invoking the avdmanager, so the /dev/kvm device should be available. This means it runs only in linux systems with the kvm module loaded and with virtualization enabled in BIOS settings. If you use windows docker, install HAXM and search google for the equivalent settings to enable hardware  acceleration into the container (or use "-no-accel" in "files/run.sh" and build the container again, without acceleration).
