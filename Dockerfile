@@ -112,6 +112,7 @@ RUN yes | sdkmanager --licenses; \
     "platforms;${ANDROID_PLATFORM}" \
     "build-tools;${BUILD_TOOLS}" \
     "system-images;${ANDROID_PLATFORM};${ANDROID_API};x86" \
+    "system-images;${ANDROID_PLATFORM};${ANDROID_API};x86_64" \
     "system-images;${ANDROID_PLATFORM};${ANDROID_API};armeabi-v7a"
 
 # Install Grandle
