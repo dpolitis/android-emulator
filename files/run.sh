@@ -24,7 +24,7 @@ echo ANDROID_PLATFORM  = "Requested ANDROID_API: ${ANDROID_PLATFORM} (${ANDROID_
 adb start-server
 
 # set hardware accelaration
-[[ $ARCH == "x86" ]] || [[ $ARCH == "x86_64" ]] && KVM="-enable-kvm" || KVM=""
+[[ $ANDROID_ARCH == "x86" ]] || [[ $ANDROID_ARCH == "x86_64" ]] && KVM="-enable-kvm" || KVM=""
 
 # Point DISPLAY to virtual X Server
 export DISPLAY=:0
