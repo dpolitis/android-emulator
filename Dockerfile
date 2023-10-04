@@ -1,12 +1,18 @@
 # Android development environment using Centos.
 
-FROM centos:7
+FROM almalinux:minimal
 
 # Specially for SSH access and port redirection (beware no quotes in value!!)
 ENV PASSWORD=android
 
 # Installation variables
-ARG ANDROID_SDK_VERSION="6200805"
+# https://developer.android.com/tools/releases/build-tools
+# https://developer.android.com/studio#command-line-tools-only
+# https://developer.android.com/studio/releases/emulator
+# https://developer.android.com/build/releases/gradle-plugin?buildsystem=ndk-build#updating-gradle
+# https://github.com/tianon/gosu
+#
+ARG ANDROID_SDK_VERSION="10406996"
 # ARCH can be "x86", "x86_64", "armeabi-v7a", "arm64-v8a", "mips"
 ENV ANDROID_ARCH="x86"
 # ANDROID_API can be "default","google_apis", "google_apis_playstore", "android-tv", "android-wear", "android-wear-cn"
@@ -16,8 +22,8 @@ ENV ANDROID_PLATFORM="android-25"
 # ANDROID_DEVICE can be any value from "files/device_list.txt" (beware no quotes in value!!)
 ENV ANDROID_DEVICE=pixel_3
 
-ENV BUILD_TOOLS="29.0.3"
-ENV GRADLE_TOOLS="6.3"
+ENV BUILD_TOOLS="34.0.0"
+ENV GRADLE_TOOLS="8.3"
 
 # Add android tools and platform tools to PATH
 ENV ANDROID_HOME="/opt/android"
@@ -26,10 +32,10 @@ ENV PATH="${PATH}:${GRADLE_HOME}/bin:/opt/gradlew:${ANDROID_HOME}/cmdline-tools/
 ENV LD_LIBRARY_PATH="${ANDROID_HOME}/emulator/lib64:${ANDROID_HOME}/emulator/lib64/qt/lib"
 
 # Export JAVA_HOME variable
-ENV JAVA_HOME="/usr/java/jdk1.8.0_251-amd64"
+ENV JAVA_HOME="/usr/java/latest"
 
 # Export noVNC variables
-ENV DISPLAY=:1 \
+ENV DISPLAY=:0 \
     SCREEN=0 \
     SCREEN_WIDTH=1440 \
     SCREEN_HEIGHT=810 \
@@ -45,38 +51,35 @@ EXPOSE 5554
 EXPOSE 5555
 EXPOSE 6080
 
-COPY files/jdk-8u251-linux-x64.rpm /tmp/jdk-8u251-linux-x64.rpm
+COPY files/jdk-21_linux-x64_bin.rpm /tmp/jdk-21_linux-x64_bin.rpm
 
 # Update packages
-RUN yum makecache; \
-    yum -y update; \
-    yum -y install net-tools \
-        sudo \
-        openssh-server \
-	socat \
-	unzip \
-	wget \
-	git \
-	epel-release \
-	alsa-lib \
-	pulseaudio-libs \
-	mesa-dri-drivers \
-	mesa-vulkan-drivers \
-	libXcomposite \
-	libXcursor; \
-    yum localinstall -y /tmp/jdk-8u251-linux-x64.rpm
+RUN microdnf makecache; \
+    microdnf -y update; \
+    microdnf -y install net-tools \
+    sudo \
+    openssh-server \
+	  socat \
+	  unzip \
+	  wget \
+	  git \
+	  epel-release \
+	  alsa-lib \
+	  pulseaudio-libs \
+	  mesa-dri-drivers \
+	  mesa-vulkan-drivers \
+	  libXcomposite \
+	  libXcursor \
+    nss; \
+    rpm -i /tmp/jdk-21_linux-x64_bin.rpm
 
 # Install x11vnc
-RUN sed -i "s/baseurl/#baseurl/g" /etc/yum.repos.d/epel.repo; \
-    sed -i "s/baseurl/#baseurl/g" /etc/yum.repos.d/epel-testing.repo; \
-    sed -i "s/#metalink/metalink/g" /etc/yum.repos.d/epel.repo; \
-    sed -i "s/#metalink/metalink/g" /etc/yum.repos.d/epel-testing.repo; \
-    yum makecache; \
-    yum install -y x11vnc; \
-    yum clean all
+RUN microdnf makecache; \
+    microdnf install -y x11vnc; \
+    microdnf clean all
 
 # Install gosu
-ENV GOSU_VERSION=1.12
+ENV GOSU_VERSION=1.16
 RUN gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4; \
     curl -o /usr/local/sbin/gosu -SL "https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-amd64"; \
     curl -o /usr/local/sbin/gosu.asc -SL "https://github.com/tianon/gosu/releases/download/${GOSU_VERSION}/gosu-amd64.asc"; \
@@ -101,12 +104,11 @@ ENV NOTVISIBLE "in users profile"
 RUN wget -nv https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_VERSION}_latest.zip -P /tmp; \
     unzip -d /opt /tmp/commandlinetools-linux-${ANDROID_SDK_VERSION}_latest.zip; \
     mkdir -p /opt/android/cmdline-tools; \
-    mv /opt/tools /opt/android/cmdline-tools/latest
+    mv /opt/cmdline-tools /opt/android/cmdline-tools/latest
 
 # Install latest android tools and system images (you can install other isystem images to your liking, by adding them below)
 RUN yes | sdkmanager --licenses; \
     sdkmanager --install \
-    "cmdline-tools;latest" \
     "platform-tools" \
     "emulator" \
     "platforms;${ANDROID_PLATFORM}" \
@@ -117,10 +119,7 @@ RUN yes | sdkmanager --licenses; \
 
 # Install Grandle
 RUN wget -nv https://services.gradle.org/distributions/gradle-${GRADLE_TOOLS}-bin.zip -P /tmp; \
-    unzip -d /opt/gradle /tmp/gradle-${GRADLE_TOOLS}-bin.zip; \
-    mkdir /opt/gradlew; \
-    /opt/gradle/gradle-${GRADLE_TOOLS}/bin/gradle wrapper --gradle-version ${GRADLE_TOOLS} --distribution-type all -p /opt/gradlew; \
-    /opt/gradle/gradle-${GRADLE_TOOLS}/bin/gradle wrapper -p /opt/gradlew
+    unzip -d /opt/gradle /tmp/gradle-${GRADLE_TOOLS}-bin.zip
 
 # Run noVNC
 RUN git clone https://github.com/novnc/noVNC.git /opt/noVNC; \

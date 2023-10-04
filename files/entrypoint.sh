@@ -25,6 +25,7 @@ fi
 
 useradd --shell /bin/bash --uid $NEW_UID --gid $NEW_GID --non-unique --create-home $USER_NAME
 usermod --append --groups wheel $USER_NAME
+usermod --append --groups kvm $USER_NAME
 chown -R $NEW_UID:$NEW_GID /home/$USER_NAME
 echo "$USER_NAME:$PASSWORD" | chpasswd
 
@@ -33,10 +34,14 @@ export HOME=/home/$USER_NAME
 # Run sshd
 /usr/sbin/sshd
 
+env | grep _ >> /etc/environment
+echo PATH=$PATH >> /etc/environment
+
 # Fix permissions
-chown -R 0:$NEW_GID /opt/{android,gradle,gradlew,noVNC}
+chown -R 0:$NEW_GID /opt/{android,gradle,noVNC}
 chmod -R g+w /opt/noVNC/utils
 chmod -R g+w /opt/android
+chown 0:kvm /dev/kvm
 
 # Execute process
 exec /usr/local/sbin/gosu $USER_NAME "$@"

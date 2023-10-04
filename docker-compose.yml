@@ -1,14 +1,13 @@
-version: "2"
+version: "3"
 
 services:
   android-emulator:
     restart: "no"
     image: android-emu:25
     container_name: android-emu
+    hostname: android-emu
     environment:
       - container=docker
-      #- ANDROID_DEVICE=tv_720p
-      #- ANDROID_ARCH=armeabi-v7a
     ports:
       - "32808:6080" #VNC connection
       - "32809:5555" #Emulator adb
