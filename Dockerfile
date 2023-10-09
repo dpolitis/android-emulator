@@ -15,12 +15,12 @@ ENV PASSWORD=android
 ARG ANDROID_SDK_VERSION="10406996"
 # ARCH can be "x86", "x86_64", "armeabi-v7a", "arm64-v8a", "mips"
 ENV ANDROID_ARCH="x86"
-# ANDROID_API can be "default","google_apis", "google_apis_playstore", "android-tv", "android-wear", "android-wear-cn"
-ENV ANDROID_API="google_apis"
-# ANDROID_PLATFORM can be "android-10"-"android-29"
-ENV ANDROID_PLATFORM="android-25"
+# ANDROID_API can be "default","google_apis", "google_apis_playstore", "android-tv", "android-wear", "android-wear-cn", etc values from "files/sdkmanager_targets.txt"
+ENV ANDROID_API="android-tv"
+# ANDROID_PLATFORM can be "android-10"-"android-34"
+ENV ANDROID_PLATFORM="android-30"
 # ANDROID_DEVICE can be any value from "files/device_list.txt" (beware no quotes in value!!)
-ENV ANDROID_DEVICE=pixel_3
+ENV ANDROID_DEVICE=tv_720p
 
 ENV BUILD_TOOLS="34.0.0"
 ENV GRADLE_TOOLS="8.3"
@@ -59,17 +59,17 @@ RUN microdnf makecache; \
     microdnf -y install net-tools \
     sudo \
     openssh-server \
-	  socat \
-	  unzip \
-	  wget \
-	  git \
-	  epel-release \
-	  alsa-lib \
-	  pulseaudio-libs \
-	  mesa-dri-drivers \
-	  mesa-vulkan-drivers \
-	  libXcomposite \
-	  libXcursor \
+    socat \
+    unzip \
+    wget \
+    git \
+    epel-release \
+    alsa-lib \
+    pulseaudio-libs \
+    mesa-dri-drivers \
+    mesa-vulkan-drivers \
+    libXcomposite \
+    libXcursor \
     nss; \
     rpm -i /tmp/jdk-21_linux-x64_bin.rpm
 
@@ -102,20 +102,18 @@ ENV NOTVISIBLE "in users profile"
 
 # Install android sdk
 RUN wget -nv https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_VERSION}_latest.zip -P /tmp; \
-    unzip -d /opt /tmp/commandlinetools-linux-${ANDROID_SDK_VERSION}_latest.zip; \
-    mkdir -p /opt/android/cmdline-tools; \
-    mv /opt/cmdline-tools /opt/android/cmdline-tools/latest
+    unzip -d /tmp /tmp/commandlinetools-linux-${ANDROID_SDK_VERSION}_latest.zip; \
+    mkdir -p ${ANDROID_HOME}
 
 # Install latest android tools and system images (you can install other isystem images to your liking, by adding them below)
-RUN yes | sdkmanager --licenses; \
-    sdkmanager --install \
+RUN yes | /tmp/cmdline-tools/bin/sdkmanager --licenses --sdk_root=${ANDROID_HOME}; \
+    /tmp/cmdline-tools/bin/sdkmanager --install --sdk_root=${ANDROID_HOME} \
+    "cmdline-tools;latest" \
     "platform-tools" \
     "emulator" \
     "platforms;${ANDROID_PLATFORM}" \
     "build-tools;${BUILD_TOOLS}" \
-    "system-images;${ANDROID_PLATFORM};${ANDROID_API};x86" \
-    "system-images;${ANDROID_PLATFORM};${ANDROID_API};x86_64" \
-    "system-images;${ANDROID_PLATFORM};${ANDROID_API};armeabi-v7a"
+    "system-images;${ANDROID_PLATFORM};${ANDROID_API};${ANDROID_ARCH}"
 
 # Install Grandle
 RUN wget -nv https://services.gradle.org/distributions/gradle-${GRADLE_TOOLS}-bin.zip -P /tmp; \

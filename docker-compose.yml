@@ -3,7 +3,7 @@ version: "3"
 services:
   android-emulator:
     restart: "no"
-    image: android-emu:25
+    image: android-emu:30
     container_name: android-emu
     hostname: android-emu
     environment:

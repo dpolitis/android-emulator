@@ -4,7 +4,7 @@ Android-emulator is a Docker image with Android SDK, gradle and emulator inside.
 
 ## Use:
 - Clone repository.
-- Download jdk-8u251-linux-x64.rpm from Oracle and put it on "files" folder.
+- Download jdk-21_linux-x64_bin.rpm from Oracle and put it on "files" folder.
 - Review Dockerfile and change any variable to your liking (for ex. ANDROID_API)
 - If you are using "google_apis_playstore" API, you need to create a pair of keys for adb to use. You can do that by:
 ```sh
@@ -13,19 +13,19 @@ $ adb keygen ~/.android/adbkey
 - Build the container and bring it up.
 ```sh
 $ cd android-emulator
-$ docker build -t android-emu:25 .
+$ docker build -t android-emu:30 .
 $ docker-compose up -d
 ```
 
 When the container starts, it runs a couple of commands to fix file permissions, so that they much your UID. This is normal, it takes some time for the emulator to start up. Be patient.
 
-By default it will create and run API 25 (x86) for you (with API: google_apis), but other versions are also supported via changing the appropriate variable in the Dockerfile before building (ANDROID_PLATFORM). You can use docker-compose.yml to set the following environment variables, before invoking docker-compose:
+By default it will create and run API 30 (x86) for you (with API: android-tv), but other versions are also supported via changing the appropriate variable in the Dockerfile before building (ANDROID_PLATFORM). You can use docker-compose.yml to set the following environment variables, before invoking docker-compose:
 
 * ANDROID_DEVICE (any value from files/device_list.txt)
-* ANDROID_ARCH (armeabi-v7a or x86)
+* ANDROID_ARCH (armeabi-v7a, arm64-v8a, x86, x86_64 and mips. Consult sdkmanager_targets.txt for valid combinations)
 
 ## How to connect to emulator
-By default docker-compose exposes the folloing ports:
+By default docker-compose exposes the following ports:
 * tcp/32809 - Emulator ADB
 * tcp/32810 - Emulator Control port
 * tcp/32811 - SSH connection to container (login: android, password: android, change this if you are security concerned) 
@@ -129,7 +129,7 @@ $ podman run -it --rm --privileged \
 --sysctl=net.ipv6.conf.all.disable_ipv6=1 \
 -e GOSU_UID=$(id -u) \
 -e GOSU_GID=$(id -g) \
-localhost/android-emu:25
+localhost/android-emu:30
 ```
 
 - The container uses "-enable-kvm" when invoking the avdmanager, so the /dev/kvm device should be available. This means it runs only in linux systems with the kvm module loaded and with virtualization enabled in BIOS settings. If you use windows docker, install HAXM and search google for the equivalent settings to enable hardware  acceleration into the container (or use "-no-accel" in "files/run.sh" and build the container again, without acceleration).
